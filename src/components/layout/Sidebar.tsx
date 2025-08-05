@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, Users, Building2, X } from "lucide-react";
+import { LayoutDashboard, Users, Building2, X, BarChart3, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +23,16 @@ const menuItems = [
     title: "Rentabilidade por Empresa",
     icon: Building2,
     href: "/empresas",
+  },
+  {
+    title: "KPIs por Funcionários",
+    icon: BarChart3,
+    href: "/kpis",
+  },
+  {
+    title: "Metas por Funcionário",
+    icon: Target,
+    href: "/metas",
   },
 ];
 
