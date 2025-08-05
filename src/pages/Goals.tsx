@@ -6,9 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
-import { Target, Edit, Plus, Calendar, TrendingUp, X } from "lucide-react";
+import { Target, Edit, Plus, Calendar, TrendingUp } from "lucide-react";
 
 // Import employee photos
 import anaPhoto from "@/assets/ana-silva.jpg";
@@ -112,101 +110,10 @@ const getCategoryName = (category: string) => {
 export const Goals = () => {
   const [selectedEmployee, setSelectedEmployee] = useState<EmployeeGoal | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isNewGoalModalOpen, setIsNewGoalModalOpen] = useState(false);
-  const [isEditGoalModalOpen, setIsEditGoalModalOpen] = useState(false);
-  const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
-  const [employeeGoals, setEmployeeGoals] = useState<EmployeeGoal[]>(mockEmployeeGoals);
-  const { toast } = useToast();
-
-  // Form states
-  const [newGoal, setNewGoal] = useState({
-    title: "",
-    targetPercentage: "",
-    currentPercentage: "",
-    deadline: "",
-    category: "" as Goal["category"]
-  });
 
   const handleEmployeeClick = (employee: EmployeeGoal) => {
     setSelectedEmployee(employee);
     setIsModalOpen(true);
-  };
-
-  const handleNewGoal = () => {
-    setIsNewGoalModalOpen(true);
-  };
-
-  const handleEditGoal = (goal: Goal) => {
-    setSelectedGoal(goal);
-    setNewGoal({
-      title: goal.title,
-      targetPercentage: goal.targetPercentage.toString(),
-      currentPercentage: goal.currentPercentage.toString(),
-      deadline: goal.deadline,
-      category: goal.category
-    });
-    setIsEditGoalModalOpen(true);
-  };
-
-  const handleSaveGoal = () => {
-    if (!selectedEmployee) return;
-
-    const goalData = {
-      id: selectedGoal?.id || Date.now().toString(),
-      title: newGoal.title,
-      targetPercentage: Number(newGoal.targetPercentage),
-      currentPercentage: Number(newGoal.currentPercentage),
-      deadline: newGoal.deadline,
-      category: newGoal.category
-    };
-
-    setEmployeeGoals(prev => prev.map(emp => {
-      if (emp.id === selectedEmployee.id) {
-        const updatedGoals = selectedGoal 
-          ? emp.goals.map(g => g.id === selectedGoal.id ? goalData : g)
-          : [...emp.goals, goalData];
-        
-        const overallProgress = Math.round(
-          updatedGoals.reduce((sum, goal) => sum + (goal.currentPercentage / goal.targetPercentage) * 100, 0) / updatedGoals.length
-        );
-
-        return { ...emp, goals: updatedGoals, overallProgress };
-      }
-      return emp;
-    }));
-
-    // Update selectedEmployee for immediate UI update
-    setSelectedEmployee(prev => {
-      if (!prev) return null;
-      const updatedGoals = selectedGoal 
-        ? prev.goals.map(g => g.id === selectedGoal.id ? goalData : g)
-        : [...prev.goals, goalData];
-      
-      const overallProgress = Math.round(
-        updatedGoals.reduce((sum, goal) => sum + (goal.currentPercentage / goal.targetPercentage) * 100, 0) / updatedGoals.length
-      );
-
-      return { ...prev, goals: updatedGoals, overallProgress };
-    });
-
-    toast({
-      title: selectedGoal ? "Meta atualizada!" : "Nova meta criada!",
-      description: selectedGoal ? `A meta "${goalData.title}" foi atualizada com sucesso.` : `A meta "${goalData.title}" foi criada com sucesso.`,
-    });
-
-    setIsNewGoalModalOpen(false);
-    setIsEditGoalModalOpen(false);
-    setSelectedGoal(null);
-    setNewGoal({ title: "", targetPercentage: "", currentPercentage: "", deadline: "", category: "" as Goal["category"] });
-  };
-
-  const handleGenerateReport = () => {
-    if (!selectedEmployee) return;
-    
-    toast({
-      title: "Relatório sendo gerado...",
-      description: `O relatório completo de ${selectedEmployee.name} será enviado por email em alguns minutos.`,
-    });
   };
 
   return (
@@ -323,7 +230,7 @@ export const Goals = () => {
                           className="h-2" 
                         />
                         <div className="flex justify-end">
-                          <Button variant="outline" size="sm" onClick={() => handleEditGoal(goal)}>
+                          <Button variant="outline" size="sm">
                             <Edit className="h-4 w-4 mr-1" />
                             Editar Meta
                           </Button>
@@ -334,11 +241,11 @@ export const Goals = () => {
                 </div>
 
                 <div className="flex justify-between">
-                  <Button variant="outline" onClick={handleNewGoal}>
+                  <Button variant="outline">
                     <Plus className="h-4 w-4 mr-2" />
                     Nova Meta
                   </Button>
-                  <Button onClick={handleGenerateReport}>
+                  <Button>
                     <TrendingUp className="h-4 w-4 mr-2" />
                     Relatório Completo
                   </Button>
@@ -346,168 +253,6 @@ export const Goals = () => {
               </div>
             </>
           )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Modal de Nova Meta */}
-      <Dialog open={isNewGoalModalOpen} onOpenChange={setIsNewGoalModalOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Nova Meta para {selectedEmployee?.name}</DialogTitle>
-            <DialogDescription>
-              Crie uma nova meta percentual para o colaborador
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="title">Título da Meta</Label>
-              <Input
-                id="title"
-                value={newGoal.title}
-                onChange={(e) => setNewGoal(prev => ({ ...prev, title: e.target.value }))}
-                placeholder="Ex: Aumentar receita mensal"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="target">Meta (%)</Label>
-                <Input
-                  id="target"
-                  type="number"
-                  value={newGoal.targetPercentage}
-                  onChange={(e) => setNewGoal(prev => ({ ...prev, targetPercentage: e.target.value }))}
-                  placeholder="15"
-                />
-              </div>
-              <div>
-                <Label htmlFor="current">Atual (%)</Label>
-                <Input
-                  id="current"
-                  type="number"
-                  value={newGoal.currentPercentage}
-                  onChange={(e) => setNewGoal(prev => ({ ...prev, currentPercentage: e.target.value }))}
-                  placeholder="12"
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="deadline">Prazo</Label>
-              <Input
-                id="deadline"
-                type="date"
-                value={newGoal.deadline}
-                onChange={(e) => setNewGoal(prev => ({ ...prev, deadline: e.target.value }))}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="category">Categoria</Label>
-              <Select value={newGoal.category} onValueChange={(value: Goal["category"]) => setNewGoal(prev => ({ ...prev, category: value }))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione uma categoria" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="revenue">Receita</SelectItem>
-                  <SelectItem value="productivity">Produtividade</SelectItem>
-                  <SelectItem value="clients">Clientes</SelectItem>
-                  <SelectItem value="training">Treinamento</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex justify-end gap-2 pt-4">
-              <Button variant="outline" onClick={() => setIsNewGoalModalOpen(false)}>
-                Cancelar
-              </Button>
-              <Button onClick={handleSaveGoal} disabled={!newGoal.title || !newGoal.targetPercentage || !newGoal.category}>
-                Criar Meta
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Modal de Editar Meta */}
-      <Dialog open={isEditGoalModalOpen} onOpenChange={setIsEditGoalModalOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Editar Meta</DialogTitle>
-            <DialogDescription>
-              Atualize as informações da meta selecionada
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="edit-title">Título da Meta</Label>
-              <Input
-                id="edit-title"
-                value={newGoal.title}
-                onChange={(e) => setNewGoal(prev => ({ ...prev, title: e.target.value }))}
-                placeholder="Ex: Aumentar receita mensal"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="edit-target">Meta (%)</Label>
-                <Input
-                  id="edit-target"
-                  type="number"
-                  value={newGoal.targetPercentage}
-                  onChange={(e) => setNewGoal(prev => ({ ...prev, targetPercentage: e.target.value }))}
-                  placeholder="15"
-                />
-              </div>
-              <div>
-                <Label htmlFor="edit-current">Atual (%)</Label>
-                <Input
-                  id="edit-current"
-                  type="number"
-                  value={newGoal.currentPercentage}
-                  onChange={(e) => setNewGoal(prev => ({ ...prev, currentPercentage: e.target.value }))}
-                  placeholder="12"
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="edit-deadline">Prazo</Label>
-              <Input
-                id="edit-deadline"
-                type="date"
-                value={newGoal.deadline}
-                onChange={(e) => setNewGoal(prev => ({ ...prev, deadline: e.target.value }))}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="edit-category">Categoria</Label>
-              <Select value={newGoal.category} onValueChange={(value: Goal["category"]) => setNewGoal(prev => ({ ...prev, category: value }))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione uma categoria" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="revenue">Receita</SelectItem>
-                  <SelectItem value="productivity">Produtividade</SelectItem>
-                  <SelectItem value="clients">Clientes</SelectItem>
-                  <SelectItem value="training">Treinamento</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex justify-end gap-2 pt-4">
-              <Button variant="outline" onClick={() => setIsEditGoalModalOpen(false)}>
-                Cancelar
-              </Button>
-              <Button onClick={handleSaveGoal} disabled={!newGoal.title || !newGoal.targetPercentage || !newGoal.category}>
-                Salvar Alterações
-              </Button>
-            </div>
-          </div>
         </DialogContent>
       </Dialog>
     </div>
