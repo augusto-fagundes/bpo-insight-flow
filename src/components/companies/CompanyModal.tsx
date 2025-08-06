@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Company } from "./CompanyCard";
-import { TrendingUp, TrendingDown, DollarSign, Calendar } from "lucide-react";
+import { TrendingUp, TrendingDown, DollarSign, Calendar, BarChart3, Target, Percent } from "lucide-react";
 import {
   Line,
   LineChart,
@@ -97,6 +97,51 @@ export const CompanyModal = ({ company, isOpen, onClose }: CompanyModalProps) =>
               <p className={`text-2xl font-bold ${isPositive ? 'text-success' : 'text-destructive'}`}>
                 {formatCurrency(profit)}
               </p>
+            </div>
+          </div>
+
+          {/* Additional insights metrics */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Percent className="h-4 w-4 text-primary" />
+                <span className="font-medium text-primary">Var. Mensal</span>
+              </div>
+              <p className={`text-xl font-bold ${
+                company.monthlyProfitabilityVariation > 0 ? 'text-success' : 
+                company.monthlyProfitabilityVariation < 0 ? 'text-destructive' : 'text-muted-foreground'
+              }`}>
+                {company.monthlyProfitabilityVariation > 0 ? '+' : ''}{company.monthlyProfitabilityVariation.toFixed(1)}%
+              </p>
+            </div>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Target className="h-4 w-4 text-blue-600" />
+                <span className="font-medium text-blue-600">Var. Acumulada</span>
+              </div>
+              <p className={`text-xl font-bold ${
+                company.cumulativeProfitabilityVariation > 0 ? 'text-success' : 
+                company.cumulativeProfitabilityVariation < 0 ? 'text-destructive' : 'text-muted-foreground'
+              }`}>
+                {company.cumulativeProfitabilityVariation > 0 ? '+' : ''}{company.cumulativeProfitabilityVariation.toFixed(1)}%
+              </p>
+            </div>
+
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <DollarSign className="h-4 w-4 text-amber-600" />
+                <span className="font-medium text-amber-600">Ticket Médio</span>
+              </div>
+              <p className="text-xl font-bold text-amber-700">{formatCurrency(company.averageTicket)}</p>
+            </div>
+
+            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <BarChart3 className="h-4 w-4 text-purple-600" />
+                <span className="font-medium text-purple-600">Contribuição</span>
+              </div>
+              <p className="text-xl font-bold text-purple-700">{company.totalRevenueContribution.toFixed(1)}%</p>
             </div>
           </div>
 

@@ -1,6 +1,16 @@
-import { Clock, Building } from "lucide-react";
+import { useState } from "react";
+import { Clock, Building, ChevronDown, ChevronUp, CheckCircle, AlertCircle, Circle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+
+export interface Task {
+  id: string;
+  name: string;
+  hours: number;
+  company: string;
+  status: 'completed' | 'in-progress' | 'pending';
+  completedAt?: string;
+}
 
 export interface Employee {
   id: string;
@@ -11,6 +21,7 @@ export interface Employee {
   hoursPerClient: { client: string; hours: number }[];
   productivity: number;
   companies: { name: string; hours: number }[];
+  tasks: Task[];
 }
 
 interface EmployeeCardProps {
@@ -19,12 +30,30 @@ interface EmployeeCardProps {
 }
 
 export const EmployeeCard = ({ employee, onClick }: EmployeeCardProps) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const getStatusIcon = (status: Task['status']) => {
+    switch (status) {
+      case 'completed':
+        return <CheckCircle className="h-3 w-3 text-success" />;
+      case 'in-progress':
+        return <AlertCircle className="h-3 w-3 text-warning" />;
+      default:
+        return <Circle className="h-3 w-3 text-muted-foreground" />;
+    }
+  };
+
+  const handleExpandClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsExpanded(!isExpanded);
+  };
+
   return (
-    <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer group">
+    <Card className="hover:shadow-lg transition-all duration-300 group">
       <CardContent className="p-6">
         <div className="flex flex-col items-center text-center space-y-4">
           <Avatar
-            className="w-16 h-16 ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all"
+            className="w-16 h-16 ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all cursor-pointer"
             onClick={() => onClick(employee)}
           >
             <AvatarImage src={employee.photo} alt={employee.name} />
@@ -68,6 +97,43 @@ export const EmployeeCard = ({ employee, onClick }: EmployeeCardProps) => {
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Expandable tasks section */}
+          <div className="w-full border-t pt-3">
+            <button
+              onClick={handleExpandClick}
+              className="flex items-center justify-between w-full text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+            >
+              <span>Tarefas ({employee.tasks.length})</span>
+              {isExpanded ? (
+                <ChevronUp className="h-4 w-4" />
+              ) : (
+                <ChevronDown className="h-4 w-4" />
+              )}
+            </button>
+
+            {isExpanded && (
+              <div className="mt-3 space-y-2 animate-fade-in">
+                {employee.tasks.map((task) => (
+                  <div
+                    key={task.id}
+                    className="flex items-center justify-between text-xs p-2 bg-muted/30 rounded"
+                  >
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      {getStatusIcon(task.status)}
+                      <span className="truncate">{task.name}</span>
+                    </div>
+                    <div className="flex flex-col items-end text-right">
+                      <span className="font-medium">{task.hours}h</span>
+                      <span className="text-muted-foreground text-xs truncate">
+                        {task.company}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </CardContent>
