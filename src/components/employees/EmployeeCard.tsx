@@ -21,7 +21,7 @@ export interface Employee {
   hoursPerClient: { client: string; hours: number }[];
   productivity: number;
   companies: { name: string; hours: number }[];
-  tasks: Task[];
+  tasks?: Task[];
 }
 
 interface EmployeeCardProps {
@@ -105,7 +105,7 @@ export const EmployeeCard = ({ employee, onClick }: EmployeeCardProps) => {
               onClick={handleExpandClick}
               className="flex items-center justify-between w-full text-sm font-medium text-primary hover:text-primary/80 transition-colors"
             >
-              <span>Tarefas ({employee.tasks.length})</span>
+              <span>Tarefas ({employee.tasks?.length || 0})</span>
               {isExpanded ? (
                 <ChevronUp className="h-4 w-4" />
               ) : (
@@ -115,7 +115,7 @@ export const EmployeeCard = ({ employee, onClick }: EmployeeCardProps) => {
 
             {isExpanded && (
               <div className="mt-3 space-y-2 animate-fade-in">
-                {employee.tasks.map((task) => (
+                {employee.tasks?.map((task) => (
                   <div
                     key={task.id}
                     className="flex items-center justify-between text-xs p-2 bg-muted/30 rounded"

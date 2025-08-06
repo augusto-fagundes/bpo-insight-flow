@@ -136,9 +136,9 @@ export const Employees = () => {
   const handleTaskClick = (task: Task) => {
     // Find all employees working on this task
     const taskEmployees = mockEmployees
-      .filter(emp => emp.tasks.some(t => t.name === task.name))
+      .filter(emp => emp.tasks && emp.tasks.some(t => t.name === task.name))
       .map(emp => {
-        const empTask = emp.tasks.find(t => t.name === task.name);
+        const empTask = emp.tasks?.find(t => t.name === task.name);
         return { name: emp.name, hours: empTask?.hours || 0 };
       });
 
@@ -153,11 +153,13 @@ export const Employees = () => {
 
   // Get all unique tasks across all employees
   const allTasks = mockEmployees.reduce((tasks: Task[], employee) => {
-    employee.tasks.forEach(task => {
-      if (!tasks.some(t => t.name === task.name)) {
-        tasks.push(task);
-      }
-    });
+    if (employee.tasks) {
+      employee.tasks.forEach(task => {
+        if (!tasks.some(t => t.name === task.name)) {
+          tasks.push(task);
+        }
+      });
+    }
     return tasks;
   }, []);
 
@@ -255,9 +257,9 @@ export const Employees = () => {
                     
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Users className="h-4 w-4" />
-                      <span>
-                        {mockEmployees.filter(emp => emp.tasks.some(t => t.name === task.name)).length} operadores
-                      </span>
+                       <span>
+                         {mockEmployees.filter(emp => emp.tasks && emp.tasks.some(t => t.name === task.name)).length} operadores
+                       </span>
                     </div>
 
                     {task.completedAt && (
